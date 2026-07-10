@@ -13,7 +13,7 @@ class Settings(BaseSettings):
 
     # --- LLM provider ---
     openai_api_key: str = ""
-llm_model: str = "gpt-4.1-mini"
+    llm_model: str = "gpt-4.1-mini"
     llm_max_tokens: int = 1024
     llm_timeout_seconds: float = 20.0
     llm_max_retries: int = 3
