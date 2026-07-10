@@ -77,14 +77,12 @@ class BigFiveLLMClient:
 
     @staticmethod
     def _extract_tool_input(response) -> dict:
-        import json
         message = response.choices[0].message
         if not message.tool_calls:
             raise LLMMalformedResponseError(
                 "El LLM no devolvió la tool call esperada (submit_big_five_profile)"
-        )
-    tool_call = message.tool_calls[0]
-    if tool_call.function.name != TOOL_NAME:
-        raise LLMMalformedResponseError(f"Tool call inesperada: {tool_call.function.name}")
-    return json.loads(tool_call.function.arguments)
-    
+            )
+        tool_call = message.tool_calls[0]
+        if tool_call.function.name != TOOL_NAME:
+            raise LLMMalformedResponseError(f"Tool call inesperada: {tool_call.function.name}")
+        return json.loads(tool_call.function.arguments)
