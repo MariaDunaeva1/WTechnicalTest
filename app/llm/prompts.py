@@ -40,44 +40,46 @@ def build_user_prompt(answers: list[tuple[str, str]]) -> str:
 # calling). Evitamos parsear texto libre: el modelo debe rellenar este
 # schema, y encima lo validamos otra vez con Pydantic al recibirlo.
 BIG_FIVE_TOOL_SCHEMA = {
-    "name": "submit_big_five_profile",
-    "description": "Envía el perfil Big Five inferido con score y rationale por dimensión.",
-    "input_schema": {
-        "type": "object",
-        "properties": {
-            "openness": {"$ref": "#/$defs/dimension"},
-            "conscientiousness": {"$ref": "#/$defs/dimension"},
-            "extraversion": {"$ref": "#/$defs/dimension"},
-            "agreeableness": {"$ref": "#/$defs/dimension"},
-            "neuroticism": {"$ref": "#/$defs/dimension"},
-            "confidence": {
-                "type": "number",
-                "minimum": 0,
-                "maximum": 1,
-                "description": "Confianza global del perfil inferido (0-1)",
-            },
-        },
-        "required": [
-            "openness",
-            "conscientiousness",
-            "extraversion",
-            "agreeableness",
-            "neuroticism",
-            "confidence",
-        ],
-        "$defs": {
-            "dimension": {
-                "type": "object",
-                "properties": {
-                    "score": {"type": "integer", "minimum": 1, "maximum": 5},
-                    "rationale": {"type": "string", "maxLength": 500},
+    "type": "function",
+    "function": {
+        "name": "submit_big_five_profile",
+        "description": "Envía el perfil Big Five inferido con score y rationale por dimensión.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "openness": {"$ref": "#/$defs/dimension"},
+                "conscientiousness": {"$ref": "#/$defs/dimension"},
+                "extraversion": {"$ref": "#/$defs/dimension"},
+                "agreeableness": {"$ref": "#/$defs/dimension"},
+                "neuroticism": {"$ref": "#/$defs/dimension"},
+                "confidence": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "description": "Confianza global del perfil inferido (0-1)",
                 },
-                "required": ["score", "rationale"],
-            }
+            },
+            "required": [
+                "openness",
+                "conscientiousness",
+                "extraversion",
+                "agreeableness",
+                "neuroticism",
+                "confidence",
+            ],
+            "$defs": {
+                "dimension": {
+                    "type": "object",
+                    "properties": {
+                        "score": {"type": "integer", "minimum": 1, "maximum": 5},
+                        "rationale": {"type": "string", "maxLength": 500},
+                    },
+                    "required": ["score", "rationale"],
+                }
+            },
         },
     },
 }
-
 PROMPT_REGISTRY = {
     "v1": {
         "system": SYSTEM_PROMPT_V1,
