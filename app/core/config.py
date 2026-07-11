@@ -1,7 +1,7 @@
-"""Configuración de la aplicación, cargada desde variables de entorno.
+"""Application configuration, loaded from environment variables.
 
-Usamos pydantic-settings para tener validación y tipado de la config,
-en vez de leer os.environ a mano por todo el código.
+We use pydantic-settings for validated, typed config instead of reading
+os.environ by hand throughout the codebase.
 """
 from functools import lru_cache
 
@@ -22,11 +22,11 @@ class Settings(BaseSettings):
     app_env: str = "local"
     log_level: str = "INFO"
 
-    # Nombre/versión del prompt activo. Ver app/llm/prompts.py
+    # Active prompt name/version. See app/llm/prompts.py
     prompt_version: str = "v1"
 
 
 @lru_cache
 def get_settings() -> Settings:
-    """Settings cacheadas (singleton) para no releer el entorno en cada request."""
+    """Cached settings (singleton) so we don't re-read the environment on every request."""
     return Settings()

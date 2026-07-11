@@ -1,16 +1,16 @@
-"""Excepciones propias, para no filtrar excepciones del SDK del proveedor
-hasta la capa de API. Así la capa API solo conoce estos tipos y decide el
-status code adecuado, sin acoplarse al SDK de Anthropic/OpenAI."""
+"""Custom exceptions, to avoid leaking provider SDK exceptions up to the
+API layer. This way the API layer only knows these types and decides the
+right status code, without coupling to the Anthropic/OpenAI SDK."""
 
 
 class LLMError(Exception):
-    """Error genérico al comunicarse con el proveedor de LLM."""
+    """Generic error communicating with the LLM provider."""
 
 
 class LLMTimeoutError(LLMError):
-    """El proveedor no respondió dentro del timeout configurado."""
+    """The provider did not respond within the configured timeout."""
 
 
 class LLMMalformedResponseError(LLMError):
-    """El LLM respondió pero no en el formato estructurado esperado
-    (tool call ausente o payload que no valida contra el schema)."""
+    """The LLM responded, but not in the expected structured format
+    (missing tool call, or a payload that fails schema validation)."""

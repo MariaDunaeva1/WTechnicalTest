@@ -1,11 +1,11 @@
-"""Contrato de datos del servicio (Pydantic).
+"""Service data contract (Pydantic).
 
-Diseño:
-- `AssessmentRequest`: 5 respuestas de texto libre del usuario.
-- `BigFiveProfile`: perfil inferido, con score 1-5 + rationale por dimensión.
-- `AssessmentResponse`: envuelve el perfil con metadata (modelo, versión de
-  prompt, timestamp) para trazabilidad — importante si luego cambias el
-  prompt y necesitas comparar resultados entre versiones.
+Design:
+- `AssessmentRequest`: 5 free-text answers from the user.
+- `BigFiveProfile`: inferred profile, with score 1-5 + rationale per dimension.
+- `AssessmentResponse`: wraps the profile with metadata (model, prompt
+  version, timestamp) for traceability — important if you later change
+  the prompt and need to compare results across versions.
 """
 from datetime import datetime, timezone
 from enum import Enum
@@ -22,27 +22,27 @@ class Dimension(str, Enum):
 
 
 class Answer(BaseModel):
-    """Una respuesta individual del usuario a una pregunta del cuestionario."""
+    """A single answer from the user to a questionnaire question."""
 
-    question_id: str = Field(..., min_length=1, description="Identificador de la pregunta")
+    question_id: str = Field(..., min_length=1, description="Question identifier")
     text: str = Field(..., min_length=1, max_length=2000)
 
     @field_validator("text")
     @classmethod
     def not_blank(cls, v: str) -> str:
         if not v.strip():
-            raise ValueError("La respuesta no puede estar vacía")
+            raise ValueError("Answer cannot be blank")
         return v.strip()
 
 
 class AssessmentRequest(BaseModel):
-    """Payload de entrada: exactamente 5 respuestas para Option A."""
+    """Input payload: exactly 5 answers for Option A."""
 
     answers: list[Answer] = Field(..., min_length=5, max_length=5)
 
 
 class DimensionScore(BaseModel):
-    """Score de una dimensión OCEAN, validado en rango 1-5."""
+    """Score for one OCEAN dimension, validated in range 1-5."""
 
     score: int = Field(..., ge=1, le=5)
     rationale: str = Field(..., min_length=1, max_length=500)
@@ -68,7 +68,7 @@ class AssessmentResponse(BaseModel):
     metadata: ResponseMetadata
 
 
-# --- Option B: contrato del flujo conversacional ---
+# --- Option B: conversational flow contract ---
 
 class ConversationStartResponse(BaseModel):
     session_id: str
@@ -85,12 +85,12 @@ class AnswerSubmission(BaseModel):
     @classmethod
     def not_blank(cls, v: str) -> str:
         if not v.strip():
-            raise ValueError("La respuesta no puede estar vacía")
+            raise ValueError("Answer cannot be blank")
         return v.strip()
 
 
 class ConversationNextResponse(BaseModel):
-    """Se devuelve mientras la conversación sigue en curso."""
+    """Returned while the conversation is still in progress."""
 
     session_id: str
     status: str = "in_progress"
@@ -101,7 +101,7 @@ class ConversationNextResponse(BaseModel):
 
 
 class ConversationCompletedResponse(BaseModel):
-    """Se devuelve cuando la última respuesta cierra la conversación."""
+    """Returned when the last answer closes the conversation."""
 
     session_id: str
     status: str = "completed"

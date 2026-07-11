@@ -1,12 +1,12 @@
-"""Wrapper async del cliente OpenAI.
+"""Async wrapper around the OpenAI client.
 
-Responsabilidad única: dado un conjunto de respuestas, llamar al LLM con
-salida estructurada (tool use) y devolver el bloque de input de la tool
-como dict crudo. La validación de ese dict contra nuestro contrato
-(Pydantic) vive en domain/, no aquí — este módulo solo sabe hablar con el
-proveedor.
+Single responsibility: given a set of answers, call the LLM with
+structured output (function calling) and return the function input as a
+raw dict. Validating that dict against our contract (Pydantic) lives in
+domain/, not here — this module only knows how to talk to the provider.
 """
 import asyncio
+import json
 import logging
 
 import openai
@@ -25,16 +25,15 @@ class BigFiveLLMClient:
         self._settings = settings
         self._client = openai.AsyncOpenAI(
             api_key=settings.openai_api_key,
-            timeout=settings.llm_timeout_seconds
+            timeout=settings.llm_timeout_seconds,
         )
 
     async def infer_profile(self, answers: list[tuple[str, str]]) -> dict:
-        """Llama al LLM y devuelve el input de la tool call como dict.
+        """Calls the LLM and returns the function call input as a dict.
 
-        Reintenta con backoff exponencial ante errores transitorios
-        (timeout, rate limit, error 5xx del proveedor). No reintenta ante
-        errores de autenticación o de payload (4xx de nuestro lado), que
-        no se van a arreglar solos.
+        Retries with exponential backoff on transient errors (timeout,
+        rate limit, provider 5xx). Does not retry on auth or payload
+        errors (4xx on our side), which won't fix themselves.
         """
         prompt = PROMPT_REGISTRY[self._settings.prompt_version]
         user_message = build_user_prompt(answers)
@@ -53,7 +52,7 @@ class BigFiveLLMClient:
                     tool_choice={"type": "function", "function": {"name": TOOL_NAME}},
                 )
                 return self._extract_tool_input(response)
-                
+
             except openai.APITimeoutError as exc:
                 last_error = exc
                 logger.warning("llm_timeout", extra={"attempt": attempt})
@@ -62,8 +61,8 @@ class BigFiveLLMClient:
                 logger.warning("llm_rate_limited", extra={"attempt": attempt})
             except openai.APIStatusError as exc:
                 if exc.status_code and exc.status_code < 500:
-                    # 4xx: no tiene sentido reintentar (p.ej. API key inválida)
-                    raise LLMError(f"Error no reintentable del proveedor: {exc}") from exc
+                    # 4xx: not worth retrying (e.g. invalid API key)
+                    raise LLMError(f"Non-retryable provider error: {exc}") from exc
                 last_error = exc
                 logger.warning("llm_server_error", extra={"attempt": attempt, "status": exc.status_code})
 
@@ -72,17 +71,17 @@ class BigFiveLLMClient:
                 await asyncio.sleep(backoff_seconds)
 
         if isinstance(last_error, openai.APITimeoutError):
-            raise LLMTimeoutError("El proveedor LLM no respondió a tiempo") from last_error
-        raise LLMError(f"Fallaron los {self._settings.llm_max_retries} intentos de llamada al LLM") from last_error
+            raise LLMTimeoutError("The LLM provider did not respond in time") from last_error
+        raise LLMError(f"All {self._settings.llm_max_retries} LLM call attempts failed") from last_error
 
     @staticmethod
     def _extract_tool_input(response) -> dict:
         message = response.choices[0].message
         if not message.tool_calls:
             raise LLMMalformedResponseError(
-                "El LLM no devolvió la tool call esperada (submit_big_five_profile)"
+                "LLM did not return the expected tool call (submit_big_five_profile)"
             )
         tool_call = message.tool_calls[0]
         if tool_call.function.name != TOOL_NAME:
-            raise LLMMalformedResponseError(f"Tool call inesperada: {tool_call.function.name}")
+            raise LLMMalformedResponseError(f"Unexpected tool call: {tool_call.function.name}")
         return json.loads(tool_call.function.arguments)

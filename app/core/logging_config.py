@@ -1,9 +1,8 @@
-"""Logging estructurado en JSON.
+"""Structured JSON logging.
 
-Usamos el logging estándar de Python (no traemos structlog como
-dependencia extra) pero con un formatter que vuelca cualquier campo
-`extra={...}` que pasemos al logger, así los logs quedan correlacionados
-por `session_id` sin acoplarnos a una librería más.
+We use Python's standard logging (no extra structlog dependency) with a
+formatter that dumps any `extra={...}` field passed to the logger, so
+logs stay correlated by `session_id` without adding another library.
 """
 import json
 import logging
@@ -18,9 +17,9 @@ class JsonFormatter(logging.Formatter):
             "logger": record.name,
             "message": record.getMessage(),
         }
-        # Cualquier atributo añadido vía `extra=` se incluye tal cual
-        # (p.ej. session_id, attempt, status) — esto es lo que permite
-        # filtrar/correlacionar logs de una misma conversación.
+        # Any attribute added via `extra=` is included as-is (e.g.
+        # session_id, attempt, status) — this is what allows filtering /
+        # correlating logs from the same conversation.
         for key, value in record.__dict__.items():
             if key not in _STANDARD_ATTRS and key != "message":
                 payload[key] = value

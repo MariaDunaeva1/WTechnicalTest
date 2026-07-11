@@ -1,10 +1,10 @@
-"""Cuestionario fijo para el flujo conversacional (Option B).
+"""Fixed questionnaire for the conversational flow (Option B).
 
-Una pregunta por dimensión, en orden fijo. Para Option A esto no se usa
-(el cliente manda las 5 respuestas de golpe); para B, el servicio guía la
-conversación pregunta a pregunta usando esta lista.
+One question per dimension, in fixed order. Not used for Option A (the
+client sends all 5 answers at once); for B, the service guides the
+conversation question by question using this list.
 
-Inspiradas en el espíritu del BFI (ver enunciado), simplificadas.
+Inspired by the spirit of the BFI (see prompt), simplified.
 """
 from dataclasses import dataclass
 
@@ -16,7 +16,7 @@ class Question:
 
 
 QUESTIONNAIRE: list[Question] = [
-    Question("q_openness", "What role do curiosity and trying new things play in your daily life"),
+    Question("q_openness", "What role do curiosity and trying new things play in your daily life?"),
     Question("q_conscientiousness", "How do you organize your tasks and plans? Do you tend to follow a plan or improvise?"),
     Question("q_extraversion", "How do you feel in social situations with lots of people?"),
     Question("q_agreeableness", "When there's a conflict of opinions, how do you usually react?"),

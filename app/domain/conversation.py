@@ -1,13 +1,13 @@
-"""Estado conversacional para Option B.
+"""Conversation state for Option B.
 
-Máquina de estados simple:
+Simple state machine:
 
-    IN_PROGRESS --(responde todas las preguntas)--> COMPLETED
+    IN_PROGRESS --(answers all questions)--> COMPLETED
 
-Almacén en memoria (dict + lock async). Es una limitación explícita y
-documentada en el README: no sobrevive a un reinicio del proceso ni
-escala a varias réplicas. Para eso haría falta Redis o una base de datos,
-fuera del alcance de esta prueba (lo indico como "qué mejoraría").
+In-memory store (dict + async lock). This is an explicit, documented
+limitation (see README): it doesn't survive a process restart and
+doesn't scale to multiple replicas. That would require Redis or a
+database, out of scope for this test (noted under "what I'd improve").
 """
 import asyncio
 import uuid
@@ -46,11 +46,11 @@ class SessionAlreadyCompletedError(Exception):
 
 
 class SessionStore:
-    """Almacén async-safe de sesiones en memoria.
+    """Async-safe in-memory session store.
 
-    El lock evita condiciones de carrera si, en teoría, llegasen dos
-    respuestas concurrentes para la misma sesión (no debería pasar con un
-    solo cliente conversando, pero es barato de garantizar).
+    The lock prevents race conditions if, in theory, two concurrent
+    answers arrived for the same session (shouldn't happen with a
+    single client conversing, but it's cheap to guarantee).
     """
 
     def __init__(self):
@@ -67,7 +67,7 @@ class SessionStore:
         async with self._lock:
             session = self._sessions.get(session_id)
         if session is None:
-            raise SessionNotFoundError(f"Sesión no encontrada: {session_id}")
+            raise SessionNotFoundError(f"Session not found: {session_id}")
         return session
 
     async def add_answer(self, session_id: str, answer: Answer) -> ConversationSession:

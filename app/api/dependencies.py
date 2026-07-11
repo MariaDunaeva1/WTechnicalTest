@@ -1,8 +1,8 @@
-"""Wiring de dependencias para FastAPI.
+"""FastAPI dependency wiring.
 
-Centralizar esto aquí (en vez de instanciar el cliente LLM dentro del
-endpoint) es lo que permite en los tests sustituir `get_assessment_service`
-por un fake que no llama a la API real (ver tests/test_endpoint.py).
+Centralizing this here (instead of instantiating the LLM client inside
+the endpoint) is what lets tests swap `get_assessment_service` for a
+fake that doesn't call the real API (see tests/test_endpoint.py).
 """
 from functools import lru_cache
 
@@ -21,7 +21,7 @@ def get_assessment_service() -> AssessmentService:
 
 @lru_cache
 def get_session_store() -> SessionStore:
-    """Singleton in-memory: todas las requests comparten el mismo store,
-    así una sesión creada en /conversation/start es visible en la
-    siguiente llamada a /conversation/{id}/answer."""
+    """In-memory singleton: all requests share the same store, so a
+    session created in /conversation/start is visible on the next call
+    to /conversation/{id}/answer."""
     return SessionStore()

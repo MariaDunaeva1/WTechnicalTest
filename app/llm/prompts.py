@@ -1,49 +1,50 @@
-"""Prompts versionados ("prompt as code").
+"""Versioned prompts ("prompt as code").
 
-Cada cambio relevante en el prompt sube de versión. La versión activa se
-fija en Settings.prompt_version y viaja en la respuesta (metadata), para
-poder correlacionar resultados con la versión de prompt que los generó.
+Every meaningful change to the prompt bumps the version. The active
+version is set in Settings.prompt_version and travels in the response
+(metadata), so results can be correlated with the prompt version that
+generated them.
 """
 
-SYSTEM_PROMPT_V1 = """Eres un asistente que infiere un perfil de personalidad \
-Big Five (OCEAN) a partir de las respuestas de un usuario a un breve \
-cuestionario. Debes basarte únicamente en el contenido de las respuestas \
-proporcionadas, sin inventar información no presente en ellas.
+SYSTEM_PROMPT_V1 = """You are an assistant that infers a Big Five (OCEAN) \
+personality profile from a user's answers to a short questionnaire. You \
+must rely solely on the content of the answers provided, without \
+inventing information that isn't present in them.
 
-Para cada una de las cinco dimensiones (openness, conscientiousness, \
+For each of the five dimensions (openness, conscientiousness, \
 extraversion, agreeableness, neuroticism):
-- Asigna un score entero de 1 a 5 (1 = polo bajo, 5 = polo alto).
-- Escribe una justificación breve (1-2 frases) que referencie evidencia \
-concreta de las respuestas del usuario.
+- Assign an integer score from 1 to 5 (1 = low pole, 5 = high pole).
+- Write a brief rationale (1-2 sentences) referencing concrete evidence \
+from the user's answers.
 
-Además, incluye un valor de "confidence" entre 0 y 1 que refleje cuánta \
-evidencia textual sustenta el perfil inferido (menos texto o respuestas \
-ambiguas deberían dar una confianza más baja).
+Additionally, include a "confidence" value between 0 and 1 reflecting \
+how much textual evidence supports the inferred profile (less text or \
+ambiguous answers should yield lower confidence).
 
-Usa siempre la herramienta `submit_big_five_profile` para responder. No \
-respondas con texto libre."""
+Always use the `submit_big_five_profile` tool to respond. Do not \
+respond with free text."""
 
 
 def build_user_prompt(answers: list[tuple[str, str]]) -> str:
-    """Construye el mensaje de usuario a partir de (question_id, texto).
+    """Builds the user message from (question_id, text) pairs.
 
-    Mantenemos esto como función pura y testeable: dado un input, siempre
-    el mismo prompt de salida.
+    Kept as a pure, testable function: given the same input, always the
+    same output prompt.
     """
-    lines = ["Respuestas del usuario al cuestionario:\n"]
+    lines = ["User's answers to the questionnaire:\n"]
     for question_id, text in answers:
         lines.append(f"- [{question_id}] {text}")
     return "\n".join(lines)
 
 
-# Definición de la tool para forzar salida estructurada (tool use / function
-# calling). Evitamos parsear texto libre: el modelo debe rellenar este
-# schema, y encima lo validamos otra vez con Pydantic al recibirlo.
+# Tool definition to force structured output (tool use / function
+# calling). We avoid parsing free text: the model must fill in this
+# schema, and we validate it again with Pydantic when we receive it.
 BIG_FIVE_TOOL_SCHEMA = {
     "type": "function",
     "function": {
         "name": "submit_big_five_profile",
-        "description": "Envía el perfil Big Five inferido con score y rationale por dimensión.",
+        "description": "Submit the inferred Big Five profile with a score and rationale per dimension.",
         "parameters": {
             "type": "object",
             "properties": {
@@ -56,7 +57,7 @@ BIG_FIVE_TOOL_SCHEMA = {
                     "type": "number",
                     "minimum": 0,
                     "maximum": 1,
-                    "description": "Confianza global del perfil inferido (0-1)",
+                    "description": "Overall confidence in the inferred profile (0-1)",
                 },
             },
             "required": [
@@ -80,6 +81,7 @@ BIG_FIVE_TOOL_SCHEMA = {
         },
     },
 }
+
 PROMPT_REGISTRY = {
     "v1": {
         "system": SYSTEM_PROMPT_V1,

@@ -1,11 +1,11 @@
-"""Capa de dominio: orquesta la inferencia del perfil.
+"""Domain layer: orchestrates profile inference.
 
-No sabe nada de HTTP (eso es de api/) ni de detalles del SDK del proveedor
-(eso es de llm/). Su trabajo es: coger el request validado, pedir al
-cliente LLM el perfil, y validar la respuesta cruda contra nuestro
-contrato antes de devolverla. Si el LLM devuelve algo que no encaja en el
-schema, lo tratamos igual que una respuesta malformada, no dejamos que un
-ValidationError de Pydantic se escape sin más.
+Knows nothing about HTTP (that's api/) or provider SDK details (that's
+llm/). Its job is: take the validated request, ask the LLM client for
+the profile, and validate the raw response against our contract before
+returning it. If the LLM returns something that doesn't fit the schema,
+we treat it the same as a malformed response — we don't let a Pydantic
+ValidationError leak out unhandled.
 """
 import logging
 
@@ -35,11 +35,11 @@ class AssessmentService:
         except ValidationError as exc:
             logger.error("llm_output_failed_validation", extra={"raw": raw})
             raise LLMMalformedResponseError(
-                f"La salida del LLM no cumple el schema BigFiveProfile: {exc}"
+                f"LLM output does not match the BigFiveProfile schema: {exc}"
             ) from exc
 
         if confidence is None:
-            raise LLMMalformedResponseError("La salida del LLM no incluye 'confidence'")
+            raise LLMMalformedResponseError("LLM output is missing 'confidence'")
 
         return AssessmentResponse(
             profile=profile,
