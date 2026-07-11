@@ -1,21 +1,16 @@
-import logging
-
 from fastapi import FastAPI
 
 from app.api.routes import router
 from app.core.config import get_settings
+from app.core.logging_config import configure_logging
 
 settings = get_settings()
-
-logging.basicConfig(
-    level=settings.log_level,
-    format='{"level":"%(levelname)s","logger":"%(name)s","message":"%(message)s"}',
-)
+configure_logging(settings.log_level)
 
 app = FastAPI(
     title="Wiselook Big Five Assessment Service",
     version="0.1.0",
-    description="Infiere un perfil de personalidad Big Five (OCEAN) a partir de respuestas de texto.",
+    description="Infers a Big Five (OCEAN) personality profile from text answers.",
 )
 
 app.include_router(router, prefix="/api/v1")

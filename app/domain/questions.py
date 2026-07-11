@@ -16,11 +16,11 @@ class Question:
 
 
 QUESTIONNAIRE: list[Question] = [
-    Question("q_openness", "¿Qué papel juegan la curiosidad y probar cosas nuevas en tu día a día?"),
-    Question("q_conscientiousness", "¿Cómo organizas tus tareas y planes? ¿Sueles seguir un plan o improvisas?"),
-    Question("q_extraversion", "¿Cómo te sientes en situaciones sociales con mucha gente?"),
-    Question("q_agreeableness", "Cuando hay un conflicto de opiniones, ¿cómo sueles reaccionar?"),
-    Question("q_neuroticism", "¿Cómo te afectan los imprevistos o el estrés en el día a día?"),
+    Question("q_openness", "What role do curiosity and trying new things play in your daily life"),
+    Question("q_conscientiousness", "How do you organize your tasks and plans? Do you tend to follow a plan or improvise?"),
+    Question("q_extraversion", "How do you feel in social situations with lots of people?"),
+    Question("q_agreeableness", "When there's a conflict of opinions, how do you usually react?"),
+    Question("q_neuroticism", "How do unexpected events or stress affect your daily life?"),
 ]
 
 

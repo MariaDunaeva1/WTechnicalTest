@@ -74,9 +74,9 @@ class SessionStore:
         async with self._lock:
             session = self._sessions.get(session_id)
             if session is None:
-                raise SessionNotFoundError(f"Sesión no encontrada: {session_id}")
+                raise SessionNotFoundError(f"Session not found: {session_id}")
             if session.status == ConversationStatus.COMPLETED:
-                raise SessionAlreadyCompletedError(f"Sesión ya completada: {session_id}")
+                raise SessionAlreadyCompletedError(f"Session already completed: {session_id}")
             session.answers.append(answer)
             if session.is_complete():
                 session.status = ConversationStatus.COMPLETED
