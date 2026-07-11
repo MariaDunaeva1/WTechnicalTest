@@ -1,0 +1,108 @@
+[
+  {
+    "request": "POST /api/v1/conversation/start",
+    "response": {
+      "session_id": "f603dee1-95e3-4eb3-86b6-534db33ddec4",
+      "question_id": "q_openness",
+      "question_text": "¿Qué papel juegan la curiosidad y probar cosas nuevas en tu día a día?",
+      "question_number": 1,
+      "total_questions": 5
+    }
+  },
+  {
+    "request": "POST /api/v1/conversation/f603dee1-95e3-4eb3-86b6-534db33ddec4/answer",
+    "body": {
+      "text": "Me encanta probar restaurantes nuevos, aprender cosas random y salirme del plan si surge algo interesante."
+    },
+    "response": {
+      "session_id": "f603dee1-95e3-4eb3-86b6-534db33ddec4",
+      "status": "in_progress",
+      "question_id": "q_conscientiousness",
+      "question_text": "¿Cómo organizas tus tareas y planes? ¿Sueles seguir un plan o improvisas?",
+      "question_number": 2,
+      "total_questions": 5
+    }
+  },
+  {
+    "request": "POST /api/v1/conversation/f603dee1-95e3-4eb3-86b6-534db33ddec4/answer",
+    "body": {
+      "text": "Suelo tener listas y calendario, pero si algo se tuerce no me cuesta reorganizar sobre la marcha."
+    },
+    "response": {
+      "session_id": "f603dee1-95e3-4eb3-86b6-534db33ddec4",
+      "status": "in_progress",
+      "question_id": "q_extraversion",
+      "question_text": "¿Cómo te sientes en situaciones sociales con mucha gente?",
+      "question_number": 3,
+      "total_questions": 5
+    }
+  },
+  {
+    "request": "POST /api/v1/conversation/f603dee1-95e3-4eb3-86b6-534db33ddec4/answer",
+    "body": {
+      "text": "Disfruto quedar con gente, aunque después de un evento grande necesito un rato a solas para recargar."
+    },
+    "response": {
+      "session_id": "f603dee1-95e3-4eb3-86b6-534db33ddec4",
+      "status": "in_progress",
+      "question_id": "q_agreeableness",
+      "question_text": "Cuando hay un conflicto de opiniones, ¿cómo sueles reaccionar?",
+      "question_number": 4,
+      "total_questions": 5
+    }
+  },
+  {
+    "request": "POST /api/v1/conversation/f603dee1-95e3-4eb3-86b6-534db33ddec4/answer",
+    "body": {
+      "text": "Prefiero buscar un punto en común antes que imponer mi postura, aunque si algo me parece injusto lo digo."
+    },
+    "response": {
+      "session_id": "f603dee1-95e3-4eb3-86b6-534db33ddec4",
+      "status": "in_progress",
+      "question_id": "q_neuroticism",
+      "question_text": "¿Cómo te afectan los imprevistos o el estrés en el día a día?",
+      "question_number": 5,
+      "total_questions": 5
+    }
+  },
+  {
+    "request": "POST /api/v1/conversation/f603dee1-95e3-4eb3-86b6-534db33ddec4/answer",
+    "body": {
+      "text": "Los imprevistos me alteran un poco al principio, pero suelo recuperar la calma rápido."
+    },
+    "response": {
+      "session_id": "f603dee1-95e3-4eb3-86b6-534db33ddec4",
+      "status": "completed",
+      "result": {
+        "profile": {
+          "openness": {
+            "score": 5,
+            "rationale": "Menciona explícitamente probar cosas nuevas y curiosidad."
+          },
+          "conscientiousness": {
+            "score": 3,
+            "rationale": "Usa listas pero se adapta con facilidad a cambios."
+          },
+          "extraversion": {
+            "score": 3,
+            "rationale": "Disfruta socializar pero necesita tiempo a solas después."
+          },
+          "agreeableness": {
+            "score": 4,
+            "rationale": "Prioriza el consenso, aunque marca límites si lo ve injusto."
+          },
+          "neuroticism": {
+            "score": 2,
+            "rationale": "Reconoce alteración inicial pero recuperación rápida de la calma."
+          }
+        },
+        "confidence": 0.82,
+        "metadata": {
+          "model": "claude-haiku-4-5-20251001",
+          "prompt_version": "v1",
+          "created_at": "2026-07-09T20:32:30.928291Z"
+        }
+      }
+    }
+  }
+]
