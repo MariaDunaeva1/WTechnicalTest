@@ -66,3 +66,43 @@ class AssessmentResponse(BaseModel):
     profile: BigFiveProfile
     confidence: float = Field(..., ge=0.0, le=1.0)
     metadata: ResponseMetadata
+
+
+# --- Option B: contrato del flujo conversacional ---
+
+class ConversationStartResponse(BaseModel):
+    session_id: str
+    question_id: str
+    question_text: str
+    question_number: int
+    total_questions: int
+
+
+class AnswerSubmission(BaseModel):
+    text: str = Field(..., min_length=1, max_length=2000)
+
+    @field_validator("text")
+    @classmethod
+    def not_blank(cls, v: str) -> str:
+        if not v.strip():
+            raise ValueError("La respuesta no puede estar vacía")
+        return v.strip()
+
+
+class ConversationNextResponse(BaseModel):
+    """Se devuelve mientras la conversación sigue en curso."""
+
+    session_id: str
+    status: str = "in_progress"
+    question_id: str
+    question_text: str
+    question_number: int
+    total_questions: int
+
+
+class ConversationCompletedResponse(BaseModel):
+    """Se devuelve cuando la última respuesta cierra la conversación."""
+
+    session_id: str
+    status: str = "completed"
+    result: AssessmentResponse
