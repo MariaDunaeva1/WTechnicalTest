@@ -1,9 +1,9 @@
-"""Test del endpoint /assess con el LLM mockeado.
+"""Test for the /assess endpoint with the LLM mocked.
 
-No llamamos a la API real de OpenAI en los tests: sustituimos
-AssessmentService por un fake vía dependency override de FastAPI. Esto
-prueba el contrato HTTP (status codes, forma del JSON, manejo de errores)
-de forma rápida, determinista y sin coste ni red.
+We don't call the real Anthropic API in tests: we swap AssessmentService
+for a fake via FastAPI's dependency override. This tests the HTTP
+contract (status codes, JSON shape, error handling) fast, deterministically,
+and with no cost or network calls.
 """
 import pytest
 from fastapi.testclient import TestClient
@@ -15,14 +15,14 @@ from app.main import app
 
 VALID_PAYLOAD = {
     "answers": [
-        {"question_id": f"q{i}", "text": f"Respuesta de ejemplo número {i}."}
+        {"question_id": f"q{i}", "text": f"Sample answer number {i}."}
         for i in range(1, 6)
     ]
 }
 
 
 def _fake_profile_response() -> AssessmentResponse:
-    dim = DimensionScore(score=4, rationale="Ejemplo de justificación de prueba.")
+    dim = DimensionScore(score=4, rationale="Sample test rationale.")
     return AssessmentResponse(
         profile=BigFiveProfile(
             openness=dim,

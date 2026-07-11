@@ -31,18 +31,18 @@ async def assess(
     request: AssessmentRequest,
     service: AssessmentService = Depends(get_assessment_service),
 ) -> AssessmentResponse:
-    """Infiera un perfil Big Five a partir de 5 respuestas de texto."""
+    """Infer a Big Five profile from 5 text answers."""
     try:
         return await service.assess(request)
     except LLMTimeoutError as exc:
         logger.warning("assess_timeout", extra={"error": str(exc)})
-        raise HTTPException(status_code=504, detail="El proveedor LLM tardó demasiado en responder") from exc
+        raise HTTPException(status_code=504, detail="The LLM provider took too long to respond") from exc
     except LLMMalformedResponseError as exc:
         logger.error("assess_malformed_llm_output", extra={"error": str(exc)})
-        raise HTTPException(status_code=502, detail="El LLM devolvió una respuesta inválida") from exc
+        raise HTTPException(status_code=502, detail="The LLM returned an invalid response") from exc
     except LLMError as exc:
         logger.error("assess_llm_error", extra={"error": str(exc)})
-        raise HTTPException(status_code=502, detail="Error al comunicarse con el proveedor LLM") from exc
+        raise HTTPException(status_code=502, detail="Error communicating with the LLM provider") from exc
 
 
 @router.get("/health")
@@ -50,7 +50,7 @@ async def health() -> dict:
     return {"status": "ok"}
 
 
-# --- Option B: flujo conversacional multi-turno ---
+# --- Option B: multi-turn conversational flow ---
 
 @router.post("/conversation/start", response_model=ConversationStartResponse)
 async def start_conversation(
@@ -81,7 +81,7 @@ async def submit_answer(
     try:
         current = await store.get(session_id)
         if current.status == ConversationStatus.COMPLETED:
-            raise SessionAlreadyCompletedError(f"Sesión ya completada: {session_id}")
+            raise SessionAlreadyCompletedError(f"Session already completed: {session_id}")
         answered_question = get_question(current.next_question_index)
         answer = Answer(question_id=answered_question.question_id, text=submission.text)
         session = await store.add_answer(session_id, answer)
@@ -105,18 +105,18 @@ async def submit_answer(
             total_questions=total_questions(),
         )
 
-    # Última respuesta: cierra la conversación e infiere el perfil.
+    # Last answer: closes the conversation and infers the profile.
     logger.info("conversation_completed", extra={"session_id": session_id})
     try:
         result = await service.assess(AssessmentRequest(answers=session.answers))
     except LLMTimeoutError as exc:
         logger.warning("assess_timeout", extra={"session_id": session_id, "error": str(exc)})
-        raise HTTPException(status_code=504, detail="El proveedor LLM tardó demasiado en responder") from exc
+        raise HTTPException(status_code=504, detail="The LLM provider took too long to respond") from exc
     except LLMMalformedResponseError as exc:
         logger.error("assess_malformed_llm_output", extra={"session_id": session_id, "error": str(exc)})
-        raise HTTPException(status_code=502, detail="El LLM devolvió una respuesta inválida") from exc
+        raise HTTPException(status_code=502, detail="The LLM returned an invalid response") from exc
     except LLMError as exc:
         logger.error("assess_llm_error", extra={"session_id": session_id, "error": str(exc)})
-        raise HTTPException(status_code=502, detail="Error al comunicarse con el proveedor LLM") from exc
+        raise HTTPException(status_code=502, detail="Error communicating with the LLM provider") from exc
 
     return ConversationCompletedResponse(session_id=session_id, result=result)
