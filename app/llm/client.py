@@ -8,6 +8,7 @@ domain/, not here — this module only knows how to talk to the provider.
 import asyncio
 import json
 import logging
+import time
 
 import openai
 
@@ -40,6 +41,7 @@ class BigFiveLLMClient:
 
         last_error: Exception | None = None
         for attempt in range(1, self._settings.llm_max_retries + 1):
+            call_started = time.monotonic()
             try:
                 response = await self._client.chat.completions.create(
                     model=self._settings.llm_model,
@@ -51,8 +53,12 @@ class BigFiveLLMClient:
                     tools=[prompt["tool_schema"]],
                     tool_choice={"type": "function", "function": {"name": TOOL_NAME}},
                 )
+                latency_ms = round((time.monotonic() - call_started) * 1000, 1)
+                logger.info(
+                    "llm_call_succeeded",
+                    extra={"attempt": attempt, "latency_ms": latency_ms, "model": self._settings.llm_model},
+                )
                 return self._extract_tool_input(response)
-
             except openai.APITimeoutError as exc:
                 last_error = exc
                 logger.warning("llm_timeout", extra={"attempt": attempt})
